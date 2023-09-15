@@ -46,7 +46,7 @@ function Login({ onLogin }) {
                         />
                         <button
                             type="submit"
-                            className="w-full p-2 mt-3 text-white bg-[#A4907C] rounded-lg"
+                            className="w-full p-2 mt-3 text-white bg-primary rounded-lg"
                         >
                             Login
                         </button>

@@ -2,7 +2,7 @@ import React from 'react';
 
 function NavigationButtons({ active, setActive }) {
     const activeCss =
-        'gap-1 inline-flex justify-center items-center px-2 md:px-6 py-2 md:py-2 text-white rounded-md bg-[#A4907C]';
+        'gap-1 inline-flex justify-center items-center px-2 md:px-6 py-2 md:py-2 text-white rounded-md bg-primary';
     const inActiveCss =
         'gap-1 inline-flex justify-center items-center px-2 md:px-6 py-2 md:py-2 rounded-md bg-gray-200 text-gray-600';
 

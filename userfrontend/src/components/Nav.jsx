@@ -9,14 +9,14 @@ function Nav({ show, toggle }) {
     const inactiveLink = CSS + " text-white";
 
     const IconCSS = " w-6 h-6";
-    const activeIcon = IconCSS + "text-red-500";
+    const activeIcon = IconCSS + "text-primary";
     const inactiveIcon = IconCSS + "text-white";
 
     const location = useLocation();
     const { pathname } = location;
 
     return (
-        <aside className={(show ? " left-0 " : " -left-full ") + 'top-0 p-4 z-50 fixed w-full h-screen md:static md:w-auto transition-all gap-2 flex bg-red-500 flex-col'}>
+        <aside className={(show ? " left-0 " : " -left-full ") + 'top-0 p-4 z-50 fixed w-full h-screen md:static md:w-auto transition-all gap-2 flex bg-primary flex-col'}>
             <div className='mb-4 mr-4' >
                 <Logo />
             </div>

@@ -143,7 +143,7 @@ const HomePage = () => {
                 <textarea id="message" rows="3" className="w-full block p-2.5 text bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder={selectedPlaceName}></textarea>
 
                 {selectedPlaceName && (
-                    <Link to={linkAddress} className='w-full p-4 mt-5 text-center text-white bg-red-500 rounded-lg'>
+                    <Link to={linkAddress} className='w-full p-4 mt-5 text-center text-white rounded-lg bg-primary'>
                         <div onClick={sendMessage}>Start Navigation</div>
                     </Link>
                 )}

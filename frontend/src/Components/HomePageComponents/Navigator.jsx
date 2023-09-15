@@ -96,7 +96,7 @@ function Navigator({
                     <span className='text-xl text-gray-500'>
                         Contact Number:
                     </span>
-                    <span className='text-2xl font-semibold text-[#A4907C] '>
+                    <span className='text-2xl font-semibold text-primary '>
                         {number}
                     </span>
                 </div>

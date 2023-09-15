@@ -5,18 +5,18 @@ import { Link, useLocation } from 'react-router-dom';
 function Nav({ show, toggle }) {
 
     const CSS = "flex gap-2 p-1 px-2 text-xl pr-4";
-    const activeLink = CSS + " bg-white text-[#A4907C] rounded-md pr-4";
+    const activeLink = CSS + " bg-white text-primary rounded-md pr-4";
     const inactiveLink = CSS + " text-white";
 
     const IconCSS = " w-6 h-6";
-    const activeIcon = IconCSS + "text-[#A4907C]";
+    const activeIcon = IconCSS + "text-primary";
     const inactiveIcon = IconCSS + " text-white";
 
     const location = useLocation();
     const { pathname } = location;
 
     return (
-        <aside className={(show ? " left-0 " : " -left-full ") + 'top-0 p-4 fixed w-full h-full md:static md:w-auto transition-all gap-2 flex bg-[#A4907C] flex-col'}>
+        <aside className={(show ? " left-0 " : " -left-full ") + 'top-0 p-4 fixed w-full h-full md:static md:w-auto transition-all gap-2 flex bg-primary flex-col'}>
             <div className='mb-4 mr-4' >
                 <Logo />
             </div>

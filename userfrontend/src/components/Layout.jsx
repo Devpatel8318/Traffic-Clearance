@@ -6,7 +6,7 @@ import Nav from "./Nav";
 export default function Layout({ children }) {
     const [showNav, setShowNav] = useState(false);
     return (
-        <div className="min-h-screen bg-red-500">
+        <div className="min-h-screen bg-primary">
             <div className="z-20 flex items-center p-4 md:hidden">
                 <button onClick={() => setShowNav(true)}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
