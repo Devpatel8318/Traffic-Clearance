@@ -228,7 +228,7 @@ function Navigator({ swal }) {
                     back
                 </a>
             </div>
-            <div id="my-map"></div>
+            <div className='-z-0' id="my-map"></div>
         </Layout>
     );
 }

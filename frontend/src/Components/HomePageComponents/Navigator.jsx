@@ -91,7 +91,7 @@ function Navigator({
     return (
         <div className="p-2 h-[70vh] text-center">
             <div className="w-full h-full p-4 bg-white border rounded-md ">
-                <div id="my-map" style={styles.mapcss}></div>
+                <div className='-z-0' id="my-map" style={styles.mapcss}></div>
                 <div className='mt-5'>
                     <span className='text-xl text-gray-500'>
                         Contact Number:

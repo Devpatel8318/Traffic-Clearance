@@ -16,12 +16,12 @@ function Nav({ show, toggle }) {
     const { pathname } = location;
 
     return (
-        <aside className={(show ? " left-0 " : " -left-full ") + 'top-0 p-4 fixed w-full h-full md:static md:w-auto transition-all gap-2 flex bg-primary flex-col'}>
+        <aside className={(show ? " left-0 " : " -left-full ") + 'top-0 p-4 fixed w-full h-full md:static md:w-auto transition-all gap-2 flex bg-primary flex-col z-50'}>
             <div className='mb-4 mr-4' >
                 <Logo />
             </div>
             <button className='fixed block md:hidden' onClick={() => toggle(false)}>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-6 h-6">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                 </svg>
             </button>
