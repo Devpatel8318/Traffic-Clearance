@@ -3,20 +3,20 @@ import axios from 'axios';
 import {
   BrowserRouter,
   Routes,
-  Route,
+  Route
 } from 'react-router-dom';
 import HomePage from './Pages/HomePage';
-import LocalAdmins from '../src/Pages/LocalAdmins';
+import LocalAdmins from './Pages/LocalAdmins';
 axios.defaults.baseURL = "http://localhost:4000";
 
 function App() {
   return (
-      <BrowserRouter>
-        <Routes>
-          <Route path='/' element={<HomePage />} />
-          <Route path='/localAdmins' element={<LocalAdmins />} />
-        </Routes>
-      </BrowserRouter>
+    <BrowserRouter>
+    <Routes>
+      <Route path='/' element={<HomePage/>}/>
+      <Route path='/localAdmins' element={<LocalAdmins/>}/>
+    </Routes>
+    </BrowserRouter>
   )
 }
 

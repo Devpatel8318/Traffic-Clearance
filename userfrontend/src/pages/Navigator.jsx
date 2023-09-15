@@ -1,226 +1,183 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Layout from '../components/Layout';
 import L from 'leaflet';
-import '../components/map.css';
-import { createMap, createMarkers, createPointLayer, createRoutingLayer, createTurnByTurnFeatures, fetchRoutingData } from '../mapImports/documentationCode';
-import { getDistanceFromLatLonInKm } from '../mapImports/util';
-import { LiveLocationMarkerIcon } from '../mapImports/styles';
-import { withSwal } from 'react-sweetalert2';
+import '../components/myCss.css';
+import { myAPIKey, getDistanceFromLatLonInKm, customIcon, customIcon2, turnByTurnMarkerStyle, LiveLocationMarkerIcon } from '../util'
 
-const DISTANCE_FROM_CIRCLE_TO_CLOSE_IT = 300; // in meters
-const AMBULANCE_IS_PASSING_CIRCLE_DISTANCE = 10; // in meters
-
+const DISTANCE_FROM_CIRCLE_TO_CLOSE_IT = 100; // in meters
+const LIVE_LOCATION_UPDATE_INTERVAL = 3000; // in milliSeconds
 let newTurns = [];
-let AmbulanceOnCircleX = null;
-let AmbulanceOnCircleY = null;
-
-function Navigator({ swal }) {
+function Navigator() {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
+
     const sxcoo = queryParams.get('sxcoo');
     const sycoo = queryParams.get('sycoo');
     const dxcoo = queryParams.get('dxcoo');
     const dycoo = queryParams.get('dycoo');
 
-    const [ws, setWs] = useState(null);
+    const [isMapReady, setIsMapReady] = useState(false);
+    const [liveXcoo, setLiveXcoo] = useState(null);
+    const [liveYcoo, setLiveYcoo] = useState(null);
+
+    const mapRef = useRef(null);
+    const markerRef = useRef(null);
+
+
     useEffect(() => {
-        const ws = new WebSocket('ws://localhost:4000');
-        setWs(ws);
-        // ws.addEventListener('message', handleMessage);
+        const fetchLocation = () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        setLiveXcoo(position.coords.latitude);
+                        setLiveYcoo(position.coords.longitude);
+                        updateMarker(position.coords.latitude, position.coords.longitude);
+                    },
+                    (error) => {
+                        console.log(error);
+                    }
+                );
+            } else {
+                console.log('Geolocation is not supported by this browser.');
+            }
+        };
+        fetchLocation();
+        const interval = setInterval(fetchLocation, LIVE_LOCATION_UPDATE_INTERVAL);
+        return () => clearInterval(interval);
     }, []);
 
-    function sendMessage(lat, lng) {
-        ws.send(JSON.stringify({
-            location: true,
-            cirle: false,
-            lat,
-            lng
-        }));
-    }
 
-    function apiCall(lat, lng, type) {
-        ws.send(JSON.stringify({
-            location: false,
-            circle: true,
-            lat,
-            lng,
-            type,
-        }));
-    }
+    useEffect(() => {
+        if (!mapRef.current) {
+            const map = L.map('my-map').setView([sxcoo, sycoo], 14);
+            mapRef.current = map;
 
-    const [listOfCircleToBeClosed, setListOfCircleToBeClosed] = useState([]);
-    const [closedCircles, setClosedCircles] = useState([]);
-    // eslint-disable-next-line no-unused-vars
-    const [onCircle, setOnCircle] = useState([]);
-    const [map, setMap] = useState(null);
+            const isRetina = L.Browser.retina;
+            const baseUrl =
+                'https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey={apiKey}';
+            const retinaUrl =
+                'https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}@2x.png?apiKey={apiKey}';
+            L.tileLayer(isRetina ? retinaUrl : baseUrl, {
+                attribution:
+                    'Powered by <a href="https://www.geoapify.com/" target="_blank">Geoapify</a> | <a href="https://openmaptiles.org/" rel="nofollow" target="_blank">© OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" rel="nofollow" target="_blank">© OpenStreetMap</a> contributors',
+                apiKey: myAPIKey,
+                maxZoom: 20,
+                id: 'osm-bright',
+            }).addTo(map);
 
-    const handleLiveLocationDragEnd = (LiveLocationMarker, setListOfCircleToBeClosed) => {
-        const { lat, lng } = LiveLocationMarker.getLatLng();
-        sendMessage(lat, lng); //send LocalAdmin current location
+            setIsMapReady(true);
+        }
+    }, [sxcoo, sycoo]);
+
+
+    useEffect(() => {
+        const map = mapRef.current;
+        if (isMapReady && map) {
+            const fromWaypoint = [sxcoo, sycoo];
+            const toWaypoint = [dxcoo, dycoo];
+
+            fetch(
+                `https://api.geoapify.com/v1/routing?waypoints=${fromWaypoint.join(
+                    ","
+                )}|${toWaypoint.join(",")}&mode=drive&apiKey=${myAPIKey}`
+            )
+                .then((res) => res.json())
+                .then((result) => {
+                    L.geoJSON(result, {
+                        style: (feature) => {
+                            return {
+                                color: "rgba(20, 137, 255, 0.7)",
+                                weight: 5,
+                            };
+                        },
+                    })
+                        .bindPopup((layer) => {
+                            return `${layer.feature.properties.distance} ${layer.feature.properties.distance_units}, ${layer.feature.properties.time}`;
+                        })
+                        .addTo(map);
+
+                    const turnByTurns = [];
+
+                    result.features.forEach((feature) =>
+                        feature.properties.legs.forEach((leg, legIndex) =>
+                            leg.steps.forEach((step) => {
+                                const pointFeature = {
+                                    type: "Feature",
+                                    geometry: {
+                                        type: "Point",
+                                        coordinates: feature.geometry.coordinates[legIndex][step.from_index],
+                                    },
+                                    properties: {
+                                        instruction: step.instruction.text,
+                                    },
+                                };
+                                turnByTurns.push(pointFeature);
+                            })
+                        )
+                    );
+
+                    L.geoJSON(
+                        {
+                            type: "FeatureCollection",
+                            features: turnByTurns,
+                        },
+                        {
+                            pointToLayer: function (feature, latlng) {
+                                return L.circleMarker(latlng, turnByTurnMarkerStyle);
+                            },
+                        }
+                    )
+                        .bindPopup((layer) => {
+                            return `${layer.feature.properties.instruction}`;
+                        })
+                        .addTo(map);
+                    newTurns = turnByTurns.map((data) => data.geometry.coordinates);
+                    L.marker([newTurns[newTurns.length - 1][1], newTurns[newTurns.length - 1][0]], { icon: customIcon2 }).addTo(map).bindPopup("1125 G Street Southeast, Washington, DC 20003, United States of America");
+                    L.marker([newTurns[0][1], newTurns[0][0]], { icon: customIcon }).addTo(map).bindPopup("1125 G Street Southeast, Washington, DC 20003, United States of America");
+
+                    const LiveLocationMarker = L.marker([sxcoo, sycoo], {
+                        icon: LiveLocationMarkerIcon,
+                    }).addTo(map);
+                    markerRef.current = LiveLocationMarker;
+
+                }).catch((error) => console.log(error));
+        }
+    }, [isMapReady]);
+
+    function updateMarker(x, y) {
+        console.log(x, y);
+        if (x && y) {
+            console.log("live lcation updated");
+            markerRef?.current?.setLatLng([x, y]);
+        }
 
         let closestTurn = null;
         let closestDistance = Infinity;
 
-        //check distance between current location and all circles and get Coordinates of circle having least distance(closest).
         newTurns.forEach((coords) => {
-            const distance = getDistanceFromLatLonInKm(coords[1], coords[0], lat, lng);
+            const distance = getDistanceFromLatLonInKm(coords[1], coords[0], x, y);
             if (distance < closestDistance) {
                 closestDistance = distance;
                 closestTurn = coords;
             }
         });
 
-        //gives list of all circles having distance <= DISTANCE_FROM_CIRCLE_TO_CLOSE_IT.
-        const nearbyCoordinates = newTurns.filter((coords) => {
-            const distance = getDistanceFromLatLonInKm(coords[1], coords[0], lat, lng) * 1000; // Convert distance to meters
-            return distance <= DISTANCE_FROM_CIRCLE_TO_CLOSE_IT;
-        });
+        console.log("Meters: " + closestDistance * 1000);
 
-        setListOfCircleToBeClosed(nearbyCoordinates);
+        if (closestDistance < DISTANCE_FROM_CIRCLE_TO_CLOSE_IT / 1000) {
+            console.log("close");
+        }
 
-        //Until now logic of Closing Circle is done
-
-        // Now comes logic to open Circles
-        // used to tell open the circle when ambulance passes through closed circle
-        // api call to open the circle
-
-
-        // ambulance is on circle ,task is to see, whether it is 'coming' to cirlce or 'going' from circle.
-        if (closestDistance < AMBULANCE_IS_PASSING_CIRCLE_DISTANCE / 1000) {
-            ambulanceComingToCircle(closestTurn[1], closestTurn[0]);
+        if (closestDistance < 1.7) {
+            L.popup()
+                .setLatLng([closestTurn[1], closestTurn[0]])
+                .setContent("<p>This Circle</p>")
+                .openOn(mapRef?.current);
         } else {
-            ambulanceHavePassedCircle();
+            console.log("no");
         }
     };
-
-    function ambulanceComingToCircle(x, y) {
-        setOnCircle(prevOnCircle => {
-            if (prevOnCircle?.length === 0) // if !==0   it means that, we have already registered that ambulance is coming to that circle. 
-            {
-                console.log("Ambulance on circle", y, x);
-                AmbulanceOnCircleX = x;
-                AmbulanceOnCircleY = y;
-                return [x, y]; // register current circle as 'ambulance coming to this circle'
-            } else {
-                return prevOnCircle; //no change
-            }
-        });
-    }
-
-    function ambulanceHavePassedCircle() {
-        setOnCircle(prev => {
-            if (prev.length !== 0) {  // if === 0   it means that there is no circle through which amublance is going out.
-                console.log("Ambulance passed circle: ", AmbulanceOnCircleX, AmbulanceOnCircleY);
-                console.log("Sent Signal to Open Circle: ", AmbulanceOnCircleX, AmbulanceOnCircleY);
-                viewToast([[AmbulanceOnCircleY, AmbulanceOnCircleX]], 'success');
-                newTurns = newTurns.filter((coords) => {
-                    return coords[1] !== AmbulanceOnCircleX && coords[0] !== AmbulanceOnCircleY; //remove current circle from list of circles
-                });
-                return []; //remove current circle as closed.
-            }
-            else {
-                return prev;  //no change
-            }
-        });
-    }
-
-
-    // once we have source coordinates, then only render map.
-    useEffect(() => {
-        const newMap = createMap(sxcoo, sycoo);
-        setMap(newMap);
-
-        return () => {
-            if (newMap) {
-                newMap.remove();
-            }
-        };
-    }, [sxcoo, sycoo]);
-
-    useEffect(() => {
-        //Documentation code to get map and markers
-        if (map) {
-            fetchRoutingData(sxcoo, sycoo, dxcoo, dycoo)
-                .then((result) => {
-                    const turnByTurns = createTurnByTurnFeatures(result);
-                    const routingLayer = createRoutingLayer(result);
-                    const pointLayer = createPointLayer(turnByTurns);
-
-                    routingLayer
-                        .bindPopup((layer) => {
-                            return `${layer.feature.properties.distance} ${layer.feature.properties.distance_units}, ${layer.feature.properties.time}`;
-                        })
-                        .addTo(map);
-
-                    pointLayer
-                        .bindPopup((layer) => {
-                            return `${layer.feature.properties.instruction}`;
-                        })
-                        .addTo(map);
-
-                    const Turns = turnByTurns.map((data) => data.geometry.coordinates);
-                    newTurns = Turns.slice(1);
-                    createMarkers(map, Turns);
-
-                    const LiveLocationMarker = L.marker([sxcoo, sycoo], {
-                        draggable: true,
-                        icon: LiveLocationMarkerIcon,
-                    }).addTo(map);
-
-                    // Drag End event
-                    LiveLocationMarker.on("dragend", function (e) {
-                        handleLiveLocationDragEnd(LiveLocationMarker, setListOfCircleToBeClosed);
-                    });
-                })
-                .catch((error) => console.log(error));
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [map, sxcoo, sycoo, dxcoo, dycoo]);
-
-    // once we have list of circles to be closed, we need to send signal to close them,
-    // But we have to keep track of circles already closed, so i use closedCircles. 
-    useEffect(() => {
-
-        // list of circles which are required to be closed and have not already been told to RTO to close them
-        const newCircles = listOfCircleToBeClosed.filter((coords) => !closedCircles.includes(coords));
-
-        // send signal to close new circles
-        newCircles.forEach((c) => {
-            console.log("Sent Signal to close Circle: ", c[1], c[0]);
-        });
-
-        viewToast(newCircles, 'warning'); // to show alert message
-
-        // now add those to list of already closed circels
-        setClosedCircles((prev) => [...prev, ...newCircles]);
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [listOfCircleToBeClosed]);
-
-
-    async function viewToast(listOfCircles, type) {
-        const Toast = swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener('mouseenter', swal.stopTimer)
-                toast.addEventListener('mouseleave', swal.resumeTimer)
-            }
-        })
-
-        for (const circle of listOfCircles) {
-            apiCall(circle[1], circle[0], type === 'warning' ? false : true) //api call to RTO/Traffic Management system
-            await Toast.fire({
-                icon: type,
-                title: `${type === 'warning' ? 'Closed':'Opened'} circle at ${circle[1]} ${circle[0]}`
-            });
-        }
-    }
-
     return (
         <Layout>
             <div className="mb-10">
@@ -233,5 +190,15 @@ function Navigator({ swal }) {
     );
 }
 
+export default Navigator;
 
-export default withSwal(({ swal }, ref) => <Navigator swal={swal} />);
+
+
+
+
+
+
+
+
+
+

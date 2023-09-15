@@ -3,7 +3,7 @@ import Logo from "./Logo";
 import Nav from "./Nav";
 
 
-export default function Layout({ children }) {
+export default function UserLayout({ children }) {
 
     const [showNav, setShowNav] = useState(false);
 

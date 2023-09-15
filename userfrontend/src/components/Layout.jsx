@@ -4,8 +4,13 @@ import Nav from "./Nav";
 
 
 export default function Layout({ children }) {
+
     const [showNav, setShowNav] = useState(false);
+
+
+
     return (
+
         <div className="min-h-screen bg-red-500">
             <div className="z-20 flex items-center p-4 md:hidden">
                 <button onClick={() => setShowNav(true)}>
@@ -26,5 +31,8 @@ export default function Layout({ children }) {
                 </div>
             </div>
         </div>
+
     )
+
+
 }
