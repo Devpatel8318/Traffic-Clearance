@@ -18,12 +18,17 @@ function LocalAdmins() {
 
     const handlePhoneNumberChange = (event) => {
         const inputValue = event.target.value.trim();
-        setIsValid(/^\d{10}$/.test(inputValue));
-        setNumber(inputValue);
+        setIsValid(/^\d{10}$/.test(inputValue.slice(0, 10)));
+        setNumber(inputValue.slice(0, 10));
     };
 
     const addLocalAdmin = async (ev) => {
-        ev?.preventDefault();
+        ev.preventDefault();
+        if (!username) { alert("Please enter a username"); return; }
+        if (!password) { alert("Please enter a password"); return; }
+        if (!city) { alert("Please select city"); return; }
+        if (!number) { alert("Please enter Number"); return; }
+        if (number.length !== 10) { alert("Please valid Number"); return; }
         try {
             const response = await axios.post('http://localhost:4000/registerLocalAdmin', {
                 username,
@@ -31,15 +36,22 @@ function LocalAdmins() {
                 city,
                 number,
             });
-            if (response.status === 201) { //success 
-                alert(response.data.message);
-            } else if (response.status === 409) { // Local Admin already exists
-                alert(response.data.message);
+            alert(response.data.message);
+            setUserName('');
+            setPassword('');
+            setCity('');
+            setNumber('');
+            setSelectedState('');
+            setIsValid(false);
+            setActive(true);
+        } catch (error) {
+            if (error.response.status === 409) { // Local Admin already exists
+                alert(error.response.data.message);
+            } else if (error.response.status === 500) { // Internal Server Error
+                alert(error.response.data.message);
             } else {
                 alert('An error occurred while registering Local Admin');
             }
-        } catch (error) {
-            alert('An error occurred. Please try again later.');
         }
     };
 
@@ -62,6 +74,7 @@ function LocalAdmins() {
                         </div>
                     ) : (
                         <NewLocalAdminForm
+                            key={12}
                             username={username}
                             password={password}
                             city={city}

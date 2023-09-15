@@ -115,12 +115,12 @@ const HomePage = () => {
                 </div>
             </div>
 
-            {number ? (
+            {(number && number.length === 10) ? (
                 <div className="flex flex-col items-center mt-16">
                     <LocationAutocomplete onPlaceSelect={onPlaceSelect} />
                 </div>
             ) : (
-                <div onClick={() => alert("Enter Contact number")} className="flex flex-col items-center mt-16">
+                <div onClick={() => {alert("Enter valid Contact number");}} className="flex flex-col items-center mt-16">
                     <LocationAutocomplete onPlaceSelect={onPlaceSelect} />
                 </div>
             )}

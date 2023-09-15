@@ -18,7 +18,7 @@ function NewLocalAdminForm({
   return (
     <div className="mt-10">
       <h1 className="mb-4 text-4xl text-center">New Local Admin</h1>
-      <form className="max-w-md mx-auto">
+      <form className="max-w-md mx-auto" onSubmit={addLocalAdmin}>
         <input
           className="w-full p-3 my-1 border rounded-lg"
           type="email"
@@ -42,7 +42,7 @@ function NewLocalAdminForm({
           className=""
         />
         <input
-          type="tel"
+          type="number"
           maxLength="10"
           value={number}
           onChange={handlePhoneNumberChange}
@@ -56,8 +56,8 @@ function NewLocalAdminForm({
         )}
 
         <button
-          onClick={() => addLocalAdmin()}
-          className="w-full p-2 mt-3 text-white bg-primary rounded-lg"
+        type='submit'
+          className="w-full p-2 mt-3 text-white rounded-lg bg-primary"
         >
           Register New Admin
         </button>
