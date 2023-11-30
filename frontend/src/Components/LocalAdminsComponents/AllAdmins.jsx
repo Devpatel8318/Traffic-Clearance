@@ -79,7 +79,7 @@ function AllAdmins({ swal }) {
 
     useEffect(() => {
         if (keyword) {
-            const searchedList = admins.filter((admin) => admin.username.includes(keyword));
+            const searchedList = admins.filter((admin) => admin.username.toLowerCase().includes(keyword.toLowerCase()));
             setAdmins(searchedList);
         } else {
             getAdmins();

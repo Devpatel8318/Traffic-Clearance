@@ -22,7 +22,7 @@ function PassKeyVerification({ onLogin }) {
           <form onSubmit={handlePassKeyVerification}>
             <input
               className="w-full p-3 my-1 border rounded-lg"
-              type="text"
+              type="password"
               value={passKey}
               onChange={(ev) => setPassKey(ev.target.value)}
               placeholder="passkey"
