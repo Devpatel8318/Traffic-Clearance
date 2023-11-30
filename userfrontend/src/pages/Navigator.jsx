@@ -216,7 +216,7 @@ function Navigator({ swal }) {
             apiCall(circle[1], circle[0], type === 'warning' ? false : true) //api call to RTO/Traffic Management system
             await Toast.fire({
                 icon: type,
-                title: `${type === 'warning' ? 'Closed':'Opened'} circle at ${circle[1]} ${circle[0]}`
+                title: `${type === 'warning' ? 'Closed' : 'Opened'} circle at ${circle[1]} ${circle[0]}`
             });
         }
     }
@@ -228,7 +228,9 @@ function Navigator({ swal }) {
                     back
                 </a>
             </div>
-            <div className='-z-0' id="my-map"></div>
+            <div className='border rounded-md p-4 h-5/6'>
+                <div className='-z-0 rounded-lg' id="my-map"></div>
+            </div>
         </Layout>
     );
 }
