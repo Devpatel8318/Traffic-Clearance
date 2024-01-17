@@ -1,29 +1,29 @@
-import axios from 'axios';
-import React, { useState } from 'react';
+import axios from 'axios'
+import React, { useState } from 'react'
 
 function Login({ onLogin }) {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const [username, setUsername] = useState('')
+    const [password, setPassword] = useState('')
 
     const handleSubmit = async (event) => {
-        event.preventDefault();
+        event.preventDefault()
 
         try {
             const response = await axios.post('/loginLocalAdmin', {
                 username,
                 password
-            });
-            onLogin(response.data.data.city, response.data.data.username);
+            })
+            onLogin(response.data.data.city, response.data.data.username)
         } catch (error) {
-            console.error(error.response.data.error);
-            alert(error.response.data.error);
-            setPassword('');
+            console.error(error.response.data.error)
+            alert(error.response.data.error)
+            setPassword('')
         }
 
-    };
+    }
 
     return (
-        <div className="mt-10">
+        <div className="mt-10 ">
             <h1 className="mb-4 text-4xl text-center">Login Local-Admin</h1>
             <div className="mt-10">
                 <div className="max-w-md mx-auto">
@@ -54,7 +54,7 @@ function Login({ onLogin }) {
                 </div>
             </div>
         </div>
-    );
+    )
 }
 
-export default Login;
+export default Login

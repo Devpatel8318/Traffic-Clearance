@@ -1,10 +1,10 @@
-import React from 'react';
+import React from 'react'
 
 function NavigationButtons({ active, setActive }) {
     const activeCss =
-        'gap-1 inline-flex justify-center items-center px-2 md:px-6 py-2 md:py-2 text-white rounded-md bg-primary';
+        'gap-1 inline-flex justify-center items-center px-2 md:px-6 py-2 md:py-2 text-white rounded-md bg-primary'
     const inActiveCss =
-        'gap-1 inline-flex justify-center items-center px-2 md:px-6 py-2 md:py-2 rounded-md bg-gray-200 text-gray-600';
+        'gap-1 inline-flex justify-center items-center px-2 md:px-6 py-2 md:py-2 rounded-md bg-gray-200 text-gray-600'
 
     return (
         <nav className="flex flex-row justify-center w-10/12 gap-2 mx-auto mt-1 mb-2 text-sm sm:w-full sm:text-sm md:text-base">
@@ -22,7 +22,7 @@ function NavigationButtons({ active, setActive }) {
                 New Local Admin
             </button>
         </nav>
-    );
+    )
 }
 
-export default NavigationButtons;
+export default NavigationButtons

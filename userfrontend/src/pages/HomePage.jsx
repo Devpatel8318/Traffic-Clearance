@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import 'leaflet/dist/leaflet.css';
-import Layout from '../components/Layout';
-import { GeoapifyGeocoderAutocomplete, GeoapifyContext } from '@geoapify/react-geocoder-autocomplete';
-import '@geoapify/geocoder-autocomplete/styles/minimal.css';
-import { Link } from 'react-router-dom';
-import StateCitySelector from '../components/StateCitySelector';
+import React, { useState, useEffect } from 'react'
+import 'leaflet/dist/leaflet.css'
+import Layout from '../components/Layout'
+import { GeoapifyGeocoderAutocomplete, GeoapifyContext } from '@geoapify/react-geocoder-autocomplete'
+import '@geoapify/geocoder-autocomplete/styles/minimal.css'
+import { Link } from 'react-router-dom'
+import StateCitySelector from '../components/StateCitySelector'
+import Logo from '../components/Logo'
 
-const LocationAutocomplete = ({ onPlaceSelect}) => {
+const LocationAutocomplete = ({ onPlaceSelect }) => {
     return (
         <div className='w-1/3 mb-10'>
             <GeoapifyContext apiKey="1bf3fed7c7684f7f9f587c95fae779ad">
@@ -18,57 +19,57 @@ const LocationAutocomplete = ({ onPlaceSelect}) => {
                 />
             </GeoapifyContext>
         </div>
-    );
-};
+    )
+}
 
 const HomePage = () => {
-    const [selectedPlace, setSelectedPlace] = useState(null);
-    const [selectedPlaceName, setSelectedPlaceName] = useState(null);
-    const [latitude, setLatitude] = useState(null);
-    const [longitude, setLongitude] = useState(null);
-    const [error, setError] = useState(null);
-    const [linkAddress, setLinkAddress] = useState(null);
-    const [selectedState, setSelectedState] = useState('');
-    const [number, setNumber] = useState('');
-    const [city,setCity] = useState(null);
+    const [selectedPlace, setSelectedPlace] = useState(null)
+    const [selectedPlaceName, setSelectedPlaceName] = useState(null)
+    const [latitude, setLatitude] = useState(null)
+    const [longitude, setLongitude] = useState(null)
+    const [error, setError] = useState(null)
+    const [linkAddress, setLinkAddress] = useState(null)
+    const [selectedState, setSelectedState] = useState('')
+    const [number, setNumber] = useState('')
+    const [city, setCity] = useState(null)
 
-    const [ws, setWs] = useState(null);
+    const [ws, setWs] = useState(null)
 
     useEffect(() => {
-        const ws = new WebSocket('ws://localhost:4000');
-        setWs(ws);
-    }, []);
+        const ws = new WebSocket('ws://localhost:4000')
+        setWs(ws)
+    }, [])
 
     useEffect(() => {
         const fetchLocation = () => {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        setLatitude(position.coords.latitude);
-                        setLongitude(position.coords.longitude);
+                        setLatitude(position.coords.latitude)
+                        setLongitude(position.coords.longitude)
                     },
                     (error) => {
-                        setError(error.message);
+                        setError(error.message)
                     }
-                );
+                )
             } else {
-                setError('Geolocation is not supported by this browser.');
+                setError('Geolocation is not supported by this browser.')
             }
-        };
+        }
 
-        fetchLocation();
-    }, []);
+        fetchLocation()
+    }, [])
 
     function onPlaceSelect(value) {
-        setSelectedPlaceName(value?.properties?.formatted);
+        setSelectedPlaceName(value?.properties?.formatted)
         if (value?.geometry?.type === 'Point') {
-            setSelectedPlace(value?.geometry?.coordinates);
+            setSelectedPlace(value?.geometry?.coordinates)
         } else if (value?.geometry?.type === 'LineString') {
-            setSelectedPlace(value?.geometry?.coordinates[0]);
+            setSelectedPlace(value?.geometry?.coordinates[0])
         } else if (value?.geometry?.type === 'MultiPolygon') {
             // Handle MultiPolygon if needed
         } else {
-            setSelectedPlace(value?.geometry?.coordinates[0][0]);
+            setSelectedPlace(value?.geometry?.coordinates[0][0])
         }
     }
 
@@ -79,27 +80,28 @@ const HomePage = () => {
                 sycoo: longitude,
                 dxcoo: selectedPlace[1] || -1,
                 dycoo: selectedPlace[0] || -1,
-            };
-            const queryString = new URLSearchParams(queryParams).toString();
-            setLinkAddress(`/Navigate?${queryString}`);
+            }
+            const queryString = new URLSearchParams(queryParams).toString()
+            setLinkAddress(`/Navigate?${queryString}`)
         }
-    }, [latitude, longitude, selectedPlace]);
+    }, [latitude, longitude, selectedPlace])
 
     const sendMessage = () => {
         ws.send(JSON.stringify({
             location: false,
-            cirle:false,
+            cirle: false,
             city,
             sxcoo: latitude,
             sycoo: longitude,
             dxcoo: selectedPlace[1] || -1,
             dycoo: selectedPlace[0] || -1,
             number,
-        }));
-    };
+        }))
+    }
 
     return (
         <Layout>
+            <Logo />
             <div className="mt-10">
                 <h1 className="mb-4 text-4xl text-center">Select State</h1>
                 <div className="max-w-md mx-auto">
@@ -120,7 +122,7 @@ const HomePage = () => {
                     <LocationAutocomplete onPlaceSelect={onPlaceSelect} />
                 </div>
             ) : (
-                <div onClick={() => {alert("Enter valid Contact number");}} className="flex flex-col items-center mt-16">
+                <div onClick={() => { alert("Enter valid Contact number") }} className="flex flex-col items-center mt-16">
                     <LocationAutocomplete onPlaceSelect={onPlaceSelect} />
                 </div>
             )}
@@ -149,7 +151,7 @@ const HomePage = () => {
                 )}
             </div>
         </Layout>
-    );
-};
+    )
+}
 
-export default HomePage;
+export default HomePage

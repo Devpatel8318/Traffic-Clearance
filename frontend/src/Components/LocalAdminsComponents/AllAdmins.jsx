@@ -1,9 +1,9 @@
-import axios from 'axios';
-import React, { useEffect, useState } from 'react';
-import { withSwal } from 'react-sweetalert2';
+import axios from 'axios'
+import React, { useEffect, useState } from 'react'
+import { withSwal } from 'react-sweetalert2'
 
 function AdminTableRow({ admin, onRemove }) {
-    const tdCSS = "p-1 font-medium font-montserrat sm:font-openSans sm:font-normal md:p-3 border text-clip overflow-hidden text-[8px] md:text-sm ";
+    const tdCSS = "p-1 font-medium font-montserrat sm:font-openSans sm:font-normal md:p-3 border text-clip overflow-hidden text-[8px] md:text-sm "
 
     return (
         <tr className="text-gray-800 border-b">
@@ -35,24 +35,24 @@ function AdminTableRow({ admin, onRemove }) {
                 </button>
             </td>
         </tr>
-    );
+    )
 }
 
 function AllAdmins({ swal }) {
-    const [admins, setAdmins] = useState([]);
-    const [keyword, setKeyword] = useState('');
-    const thCSS = "border py-1 sm:py-2 md:py-2 text-[10px] md:text-base text-center";
+    const [admins, setAdmins] = useState([])
+    const [keyword, setKeyword] = useState('')
+    const thCSS = "border py-1 sm:py-2 md:py-2 text-[10px] md:text-base text-center"
 
     useEffect(() => {
-        getAdmins();
-    }, []);
+        getAdmins()
+    }, [])
 
     async function getAdmins() {
         try {
-            const res = await axios.get('/allLocalAdmins');
-            setAdmins(res.data.data);
+            const res = await axios.get('/allLocalAdmins')
+            setAdmins(res.data.data)
         } catch (error) {
-            console.error(error);
+            console.error(error)
         }
     }
 
@@ -68,24 +68,24 @@ function AllAdmins({ swal }) {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    await axios.delete(`/admin/${id}`);
-                    getAdmins();
+                    await axios.delete(`/admin/${id}`)
+                    getAdmins()
                 } catch (error) {
-                    console.error(error.response.data.error);
+                    console.error(error.response.data.error)
                 }
             }
-        });
+        })
     }
 
     useEffect(() => {
         if (keyword) {
-            const searchedList = admins.filter((admin) => admin.username.toLowerCase().includes(keyword.toLowerCase()));
-            setAdmins(searchedList);
+            const searchedList = admins.filter((admin) => admin.username.toLowerCase().includes(keyword.toLowerCase()))
+            setAdmins(searchedList)
         } else {
-            getAdmins();
+            getAdmins()
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [keyword]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [keyword])
 
     return (
         <div>
@@ -114,7 +114,7 @@ function AllAdmins({ swal }) {
                 </tbody>
             </table>
         </div>
-    );
+    )
 }
 
-export default withSwal(({ swal }, ref) => <AllAdmins swal={swal} />);
+export default withSwal(({ swal }, ref) => <AllAdmins swal={swal} />)
